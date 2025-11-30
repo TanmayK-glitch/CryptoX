@@ -28,13 +28,10 @@ function Footer() {
 
                     {/* Social Icons */}
                     <div className="flex items-center gap-2">
-                        <a href="#" className="group w-8 h-8 border border-neutral-200 hover:border-black hover:bg-black rounded-md flex items-center justify-center transition-all">
+                        <a href="https://x.com/Ktanmay19" target="_blank" rel="noopener noreferrer" className="group w-8 h-8 border border-neutral-200 hover:border-black hover:bg-black rounded-md flex items-center justify-center transition-all">
                             <i className="ri-twitter-x-line text-sm text-neutral-400 group-hover:text-white"></i>
                         </a>
-                        <a href="#" className="group w-8 h-8 border border-neutral-200 hover:border-black hover:bg-black rounded-md flex items-center justify-center transition-all">
-                            <i className="ri-discord-line text-sm text-neutral-400 group-hover:text-white"></i>
-                        </a>
-                        <a href="#" className="group w-8 h-8 border border-neutral-200 hover:border-black hover:bg-black rounded-md flex items-center justify-center transition-all">
+                        <a href="https://github.com/TanmayK-glitch/CryptoX" target="_blank" rel="noopener noreferrer" className="group w-8 h-8 border border-neutral-200 hover:border-black hover:bg-black rounded-md flex items-center justify-center transition-all">
                             <i className="ri-github-line text-sm text-neutral-400 group-hover:text-white"></i>
                         </a>
                     </div>
