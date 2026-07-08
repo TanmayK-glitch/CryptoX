@@ -107,7 +107,7 @@ function Home() {
               <Link
                 to={`/coin/${item.id}`}
                 key={index}
-                className="block hover:bg-neutral-50 transition-colors"
+                className="block hover:bg-neutral-100 cursor-pointer transition-colors"
               >
                 {/* Desktop Row */}
                 <div className="hidden md:grid grid-cols-5 gap-4 px-6 py-4 items-center">
@@ -132,11 +132,10 @@ function Home() {
                     {item.current_price?.toLocaleString() || "—"}
                   </div>
                   <div
-                    className={`text-right text-sm font-medium ${
-                      item.price_change_percentage_24h > 0
+                    className={`text-right text-sm font-medium ${item.price_change_percentage_24h > 0
                         ? "text-green-700"
                         : "text-red-700"
-                    }`}
+                      }`}
                   >
                     {item.price_change_percentage_24h > 0 ? "+" : ""}
                     {item.price_change_percentage_24h?.toFixed(2) || "0.00"}%
@@ -172,11 +171,10 @@ function Home() {
                         {item.current_price?.toLocaleString()}
                       </p>
                       <p
-                        className={`text-xs font-medium ${
-                          item.price_change_percentage_24h > 0
+                        className={`text-xs font-medium ${item.price_change_percentage_24h > 0
                             ? "text-green-700"
                             : "text-red-700"
-                        }`}
+                          }`}
                       >
                         {item.price_change_percentage_24h > 0 ? "+" : ""}
                         {item.price_change_percentage_24h?.toFixed(2)}%
