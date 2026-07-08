@@ -1,15 +1,16 @@
 import React, { useContext } from "react";
 import { coinContext } from "../../Context/CoinContext";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 
 function Navbar() {
     const context = useContext(coinContext);
     const { setCurrency } = context || {};
+    const location = useLocation();
 
     if (!context) {
         return (
             <div className="flex items-center justify-center h-14 bg-white border-b border-neutral-200">
-                <div className="text-neutral-400">Loading...</div>
+                <div className="w-5 h-5 border-2 border-neutral-200 border-t-black rounded-full animate-spin"></div>
             </div>
         );
     }
@@ -31,8 +32,10 @@ function Navbar() {
         }
     };
 
+    const isHome = location.pathname === "/";
+
     return (
-        <nav className="sticky top-0 z-50 bg-white border-b border-neutral-200">
+        <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-neutral-200">
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
                 <div className="flex items-center justify-between h-14">
                     {/* Logo */}
@@ -47,6 +50,19 @@ function Navbar() {
 
                     {/* Right Section */}
                     <div className="flex items-center gap-3">
+                        {/* Home Link — highlighted when active */}
+                        <NavLink
+                            to="/"
+                            className={`hidden sm:inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                                isHome
+                                    ? "bg-neutral-100 text-black"
+                                    : "text-neutral-500 hover:text-black hover:bg-neutral-50"
+                            }`}
+                        >
+                            <i className="ri-home-4-line text-sm"></i>
+                            Home
+                        </NavLink>
+
                         {/* Currency Selector */}
                         <select
                             onChange={currencyhandler}

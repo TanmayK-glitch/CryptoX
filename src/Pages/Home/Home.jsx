@@ -4,10 +4,12 @@ import { Link } from "react-router-dom";
 
 function Home() {
   const context = useContext(coinContext);
-  const { allCoin, currency, loading } = context || {
+  const { allCoin, currency, loading, error, fetchAllCoin } = context || {
     allCoin: [],
     currency: { symbol: "$" },
     loading: false,
+    error: null,
+    fetchAllCoin: () => {},
   };
   const [displayCoin, setDisplayCoin] = useState([]);
   const [input, setInput] = useState("");
@@ -29,8 +31,9 @@ function Home() {
 
   if (!context) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-neutral-400 text-base">Loading...</div>
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="w-8 h-8 border-2 border-neutral-200 border-t-black rounded-full animate-spin mb-3"></div>
+        <p className="text-neutral-400 text-sm">Loading...</p>
       </div>
     );
   }
@@ -38,6 +41,11 @@ function Home() {
   useEffect(() => {
     setDisplayCoin(allCoin);
   }, [allCoin]);
+
+  useEffect(() => {
+    document.title = "CryptoX — Crypto Marketplace";
+    return () => { document.title = "CryptoX"; };
+  }, []);
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
@@ -186,9 +194,22 @@ function Home() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-16">
-            <i className="ri-coin-line text-3xl text-neutral-300 mb-3"></i>
-            <p className="text-neutral-400 text-sm">No coins available</p>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <i className={`${error ? 'ri-error-warning-line text-red-300' : 'ri-coin-line text-neutral-300'} text-3xl mb-3`}></i>
+            <p className="text-neutral-500 text-sm font-medium mb-1">
+              {error ? 'Failed to load coins' : 'No coins available'}
+            </p>
+            {error && (
+              <>
+                <p className="text-neutral-400 text-xs max-w-sm mb-4">{error}</p>
+                <button
+                  onClick={fetchAllCoin}
+                  className="px-5 py-2 bg-black hover:bg-neutral-800 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer"
+                >
+                  Retry
+                </button>
+              </>
+            )}
           </div>
         )}
       </div>
