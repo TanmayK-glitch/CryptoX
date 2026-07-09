@@ -2,6 +2,9 @@ import { createContext, useState, useEffect, useCallback } from "react";
 
 export const coinContext = createContext();
 
+const apiCache = new Map();
+const CACHE_TTL = 60 * 1000;
+
 const CoinContextProvider = (props) => {
 
     const [allCoin, setAllCoin] = useState([]);
@@ -12,11 +15,19 @@ const CoinContextProvider = (props) => {
         symbol: "$"
     });
 
-    const fetchAllCoin = useCallback(async () => {
+    const fetchAllCoin = useCallback(async (force = false) => {
         setLoading(true);
         setError(null);
 
         const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency.name}&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h`;
+
+        const cached = apiCache.get(url);
+        if (!force && cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
+            console.log("[CoinContext] Using cached data for:", url);
+            setAllCoin(cached.data);
+            setLoading(false);
+            return;
+        }
 
         console.log("[CoinContext] Fetching:", url);
 
@@ -37,6 +48,7 @@ const CoinContextProvider = (props) => {
             console.log("[CoinContext] Data received, type:", typeof data, "isArray:", Array.isArray(data), "length:", data?.length);
 
             if (Array.isArray(data) && data.length > 0) {
+                apiCache.set(url, { data, timestamp: Date.now() });
                 setAllCoin(data);
                 setError(null);
             } else if (Array.isArray(data) && data.length === 0) {
@@ -60,7 +72,10 @@ const CoinContextProvider = (props) => {
     }, [currency]);
 
     useEffect(() => {
-        fetchAllCoin();
+        const timer = setTimeout(() => {
+            fetchAllCoin();
+        }, 400);
+        return () => clearTimeout(timer);
     }, [fetchAllCoin]);
 
     const contextValue = {

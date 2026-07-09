@@ -6,7 +6,7 @@ import Coin from "./Pages/Coin/Coin";
 import Footer from "./Components/Navbar/Footer";
 
 // Set to false to restore the normal app
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 function App() {
   if (MAINTENANCE_MODE) {

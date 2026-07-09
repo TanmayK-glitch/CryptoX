@@ -3,6 +3,9 @@ import { useParams, Link } from "react-router-dom";
 import { coinContext } from "../../Context/CoinContext";
 import LineChart from "../../Components/LineChart/LineChart";
 
+const apiCache = new Map();
+const CACHE_TTL = 60 * 1000; // 60 seconds
+
 function Coin() {
   const { coinId } = useParams();
   const context = useContext(coinContext);
@@ -13,15 +16,28 @@ function Coin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchCoinData = async () => {
+  const fetchCoinData = async (force = false) => {
     setLoading(true);
     setError(null);
     try {
+      const coinUrl = `https://api.coingecko.com/api/v3/coins/${coinId}`;
+      const histUrl = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${currency.name}&days=10&interval=daily`;
+      const cacheKey = `${coinUrl}|${histUrl}`;
+
+      const cached = apiCache.get(cacheKey);
+      if (!force && cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
+        console.log("[Coin] Using cached data for:", coinId);
+        setCoinData(cached.data.coinJson);
+        setHistoricalData(cached.data.histJson);
+        setLoading(false);
+        return;
+      }
+
+      console.log("[Coin] Fetching:", coinId);
+
       const [coinRes, histRes] = await Promise.all([
-        fetch(`https://api.coingecko.com/api/v3/coins/${coinId}`),
-        fetch(
-          `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${currency.name}&days=10&interval=daily`
-        ),
+        fetch(coinUrl),
+        fetch(histUrl),
       ]);
 
       if (!coinRes.ok || !histRes.ok) {
@@ -32,6 +48,8 @@ function Coin() {
 
       const coinJson = await coinRes.json();
       const histJson = await histRes.json();
+
+      apiCache.set(cacheKey, { data: { coinJson, histJson }, timestamp: Date.now() });
 
       setCoinData(coinJson);
       setHistoricalData(histJson);
@@ -85,7 +103,7 @@ function Coin() {
             ← Back Home
           </Link>
           <button
-            onClick={fetchCoinData}
+            onClick={() => fetchCoinData(true)}
             className="px-6 py-2.5 bg-black hover:bg-neutral-800 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer"
           >
             Retry
@@ -124,7 +142,7 @@ function Coin() {
           Back
         </Link>
         <button
-          onClick={fetchCoinData}
+          onClick={() => fetchCoinData(true)}
           className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-neutral-600 hover:text-black border border-neutral-200 hover:border-neutral-400 rounded-lg transition-colors cursor-pointer"
         >
           <i className="ri-refresh-line text-base"></i>
