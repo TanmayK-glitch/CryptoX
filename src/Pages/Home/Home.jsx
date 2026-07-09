@@ -93,7 +93,7 @@ function Home() {
       </form>
 
       {/* Coin List Section */}
-      <div className="border border-neutral-200 rounded-lg overflow-hidden">
+      <div className="md:border md:border-neutral-200 md:rounded-lg md:overflow-hidden">
         {/* Desktop Table Header */}
         <div className="hidden md:grid grid-cols-5 gap-4 px-6 py-3 bg-neutral-50 border-b border-neutral-200 text-xs font-medium text-neutral-500 uppercase tracking-wide">
           <div>#</div>
@@ -110,12 +110,12 @@ function Home() {
             <p className="text-neutral-400 text-sm">Loading coins...</p>
           </div>
         ) : displayCoin && displayCoin.length > 0 ? (
-          <div className="divide-y divide-neutral-100">
+          <div className="flex flex-col gap-4 md:gap-0 md:divide-y md:divide-neutral-100">
             {displayCoin.slice(0, 10).map((item, index) => (
               <Link
                 to={`/coin/${item.id}`}
                 key={index}
-                className="block hover:bg-neutral-100 cursor-pointer transition-colors"
+                className="block bg-white border border-neutral-200 rounded-xl p-4 shadow-sm hover:shadow-md md:border-none md:rounded-none md:p-0 md:shadow-none md:hover:shadow-none md:hover:bg-neutral-100 transition-all cursor-pointer"
               >
                 {/* Desktop Row */}
                 <div className="hidden md:grid grid-cols-5 gap-4 px-6 py-4 items-center">
@@ -155,11 +155,11 @@ function Home() {
                 </div>
 
                 {/* Mobile Row */}
-                <div className="md:hidden px-4 py-4">
-                  <div className="flex items-center justify-between">
+                <div className="md:hidden">
+                  <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <span className="text-neutral-400 text-xs font-medium w-5">
-                        {item.market_cap_rank}
+                        #{item.market_cap_rank}
                       </span>
                       <img
                         src={item.image}
@@ -173,15 +173,21 @@ function Home() {
                         </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-black font-medium text-sm">
+                  </div>
+                  <div className="flex items-center justify-between pt-3 border-t border-neutral-100">
+                    <div className="text-left">
+                       <p className="text-neutral-400 text-[11px] uppercase tracking-wider mb-0.5">Price</p>
+                       <p className="text-black font-semibold text-sm">
                         {currency.symbol}
                         {item.current_price?.toLocaleString()}
-                      </p>
+                       </p>
+                    </div>
+                    <div className="text-right">
+                       <p className="text-neutral-400 text-[11px] uppercase tracking-wider mb-0.5">24h Change</p>
                       <p
-                        className={`text-xs font-medium ${item.price_change_percentage_24h > 0
-                            ? "text-green-700"
-                            : "text-red-700"
+                        className={`text-sm font-semibold ${item.price_change_percentage_24h > 0
+                            ? "text-green-600"
+                            : "text-red-600"
                           }`}
                       >
                         {item.price_change_percentage_24h > 0 ? "+" : ""}

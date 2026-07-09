@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useRef, useEffect } from "react";
 import { coinContext } from "../../Context/CoinContext";
 import { NavLink, useLocation } from "react-router-dom";
 
@@ -15,21 +15,30 @@ function Navbar() {
         );
     }
 
-    const currencyhandler = (e) => {
-        switch (e.target.value) {
-            case "usd":
-                setCurrency({ name: "usd", symbol: "$" });
-                break;
-            case "inr":
-                setCurrency({ name: "inr", symbol: "₹" });
-                break;
-            case "eur":
-                setCurrency({ name: "eur", symbol: "€" });
-                break;
-            default:
-                setCurrency({ name: "usd", symbol: "$" });
-                break;
-        }
+    const currencies = [
+        { value: "usd", label: "USD", symbol: "$" },
+        { value: "inr", label: "INR", symbol: "₹" },
+        { value: "eur", label: "EUR", symbol: "€" },
+    ];
+
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [selectedLabel, setSelectedLabel] = useState("USD");
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setDropdownOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const selectCurrency = (cur) => {
+        setCurrency({ name: cur.value, symbol: cur.symbol });
+        setSelectedLabel(cur.label);
+        setDropdownOpen(false);
     };
 
     const isHome = location.pathname === "/";
@@ -63,21 +72,44 @@ function Navbar() {
                             Home
                         </NavLink>
 
-                        {/* Currency Selector */}
-                        <select
-                            onChange={currencyhandler}
-                            className="bg-white text-neutral-700 text-sm font-medium px-3 py-1.5 rounded-md border border-neutral-200 hover:border-neutral-400 focus:border-black focus:outline-none transition-colors cursor-pointer"
-                        >
-                            <option value="usd">USD</option>
-                            <option value="inr">INR</option>
-                            <option value="eur">EUR</option>
-                        </select>
+                        {/* Currency Selector — custom dropdown */}
+                        <div className="relative" ref={dropdownRef}>
+                            <button
+                                onClick={() => setDropdownOpen((prev) => !prev)}
+                                className="flex items-center gap-1.5 bg-white text-neutral-700 text-sm font-medium px-3 py-1.5 rounded-lg border border-neutral-200 hover:border-neutral-400 transition-colors cursor-pointer"
+                            >
+                                {selectedLabel}
+                                <i
+                                    className="ri-arrow-down-s-line text-sm transition-transform duration-150"
+                                    style={{ transform: dropdownOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                                ></i>
+                            </button>
 
-                        {/* Sign In Button */}
-                        <button className="hidden sm:flex items-center gap-1.5 px-4 py-1.5 bg-black hover:bg-neutral-800 text-white text-sm font-medium rounded-md transition-colors">
-                            Sign In
-                            <i className="ri-arrow-right-up-line text-xs"></i>
-                        </button>
+                            <div
+                                className="absolute right-0 mt-1.5 w-28 bg-white border border-neutral-200 rounded-lg shadow-lg overflow-hidden z-50"
+                                style={{
+                                    opacity: dropdownOpen ? 1 : 0,
+                                    transform: dropdownOpen ? "scale(1)" : "scale(0.95)",
+                                    transformOrigin: "top right",
+                                    transition: "opacity 150ms ease-out, transform 150ms ease-out",
+                                    pointerEvents: dropdownOpen ? "auto" : "none",
+                                }}
+                            >
+                                {currencies.map((cur) => (
+                                    <button
+                                        key={cur.value}
+                                        onClick={() => selectCurrency(cur)}
+                                        className={`w-full text-left px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${
+                                            selectedLabel === cur.label
+                                                ? "bg-neutral-100 text-black"
+                                                : "text-neutral-600 hover:bg-neutral-50 hover:text-black"
+                                        }`}
+                                    >
+                                        {cur.symbol} {cur.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

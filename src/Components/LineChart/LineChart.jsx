@@ -33,8 +33,19 @@ const LineChart = ({ historicalData }) => {
       <ResponsiveContainer width="100%" height="100%">
         <RLineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="#e5e5e5" vertical={false} />
-          <XAxis dataKey="date" tick={{ fill: "#737373", fontSize: 12 }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fill: "#737373", fontSize: 12 }} axisLine={false} tickLine={false} domain={["auto", "auto"]} />
+          <XAxis dataKey="date" tick={{ fill: "#737373", fontSize: 11 }} tickMargin={10} axisLine={false} tickLine={false} />
+          <YAxis 
+            tick={{ fill: "#737373", fontSize: 11 }} 
+            axisLine={false} 
+            tickLine={false} 
+            domain={["auto", "auto"]} 
+            width={55}
+            tickFormatter={(val) => {
+              if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
+              if (val >= 1000) return `${(val / 1000).toFixed(0)}k`;
+              return val.toLocaleString();
+            }}
+          />
           <Tooltip
             contentStyle={{ borderRadius: 8, border: "1px solid #e5e5e5" }}
             labelStyle={{ color: "#171717", fontWeight: 600 }}

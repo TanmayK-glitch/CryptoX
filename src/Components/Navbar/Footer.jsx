@@ -13,18 +13,6 @@ function Footer() {
                         </span>
                     </div>
 
-                    {/* Links */}
-                    <div className="flex items-center gap-6 text-sm">
-                        <a href="#" className="text-neutral-500 hover:text-black transition-colors">
-                            Terms
-                        </a>
-                        <a href="#" className="text-neutral-500 hover:text-black transition-colors">
-                            Privacy
-                        </a>
-                        <a href="#" className="text-neutral-500 hover:text-black transition-colors">
-                            Support
-                        </a>
-                    </div>
 
                     {/* Social Icons */}
                     <div className="flex items-center gap-2">

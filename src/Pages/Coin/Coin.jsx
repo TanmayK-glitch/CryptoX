@@ -230,10 +230,8 @@ function Coin() {
         <div className="w-full lg:w-2/3 min-w-0">
           <div className="bg-white border border-neutral-200 rounded-2xl p-4 sm:p-6 md:p-8 shadow-sm h-full flex flex-col">
             <h2 className="text-xl font-bold text-black mb-6">Price History (Last 10 Days)</h2>
-            <div className="flex-1 w-full overflow-x-auto">
-              <div className="min-w-[300px]">
-                <LineChart historicalData={historicalData?.prices ? historicalData : null} />
-              </div>
+            <div className="flex-1 w-full min-w-0">
+              <LineChart historicalData={historicalData?.prices ? historicalData : null} />
             </div>
           </div>
         </div>
