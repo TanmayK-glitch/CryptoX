@@ -1,4 +1,6 @@
 import { createContext, useState, useEffect, useCallback } from "react";
+import { throttledFetch } from "../utils/throttledFetch";
+import { log, warn, error as logError } from "../utils/logger";
 
 export const coinContext = createContext();
 
@@ -19,50 +21,48 @@ const CoinContextProvider = (props) => {
         setLoading(true);
         setError(null);
 
-        const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency.name}&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h`;
+        // Route through Vercel serverless proxy — API key injected server-side.
+        // .env var: COINGECKO_API_KEY (no VITE_ prefix, server-only, never bundled into client JS)
+        const url = `/api/coins?vs_currency=${currency.name}&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h`;
 
         const cached = apiCache.get(url);
         if (!force && cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
-            console.log("[CoinContext] Using cached data for:", url);
+            log("[CoinContext] Using cached data for:", url);
             setAllCoin(cached.data);
             setLoading(false);
             return;
         }
 
-        console.log("[CoinContext] Fetching:", url);
+        log("[CoinContext] Fetching:", url);
 
         try {
-            const response = await fetch(url);
+            const response = await throttledFetch(url);
 
-            console.log("[CoinContext] Response status:", response.status);
+            log("[CoinContext] Response status:", response.status);
 
             if (!response.ok) {
-                // CoinGecko returns 429 when rate-limited
-                if (response.status === 429) {
-                    throw new Error("Rate limited by CoinGecko. Please wait a moment and try again.");
-                }
                 throw new Error(`API error: ${response.status} ${response.statusText}`);
             }
 
             const data = await response.json();
-            console.log("[CoinContext] Data received, type:", typeof data, "isArray:", Array.isArray(data), "length:", data?.length);
+            log("[CoinContext] Data received, type:", typeof data, "isArray:", Array.isArray(data), "length:", data?.length);
 
             if (Array.isArray(data) && data.length > 0) {
                 apiCache.set(url, { data, timestamp: Date.now() });
                 setAllCoin(data);
                 setError(null);
             } else if (Array.isArray(data) && data.length === 0) {
-                console.warn("[CoinContext] API returned empty array");
+                warn("[CoinContext] API returned empty array");
                 setAllCoin([]);
                 setError("No coins returned from the API.");
             } else {
                 // CoinGecko sometimes returns { status: { error_code: 429, ... } }
-                console.error("[CoinContext] Unexpected response shape:", data);
+                logError("[CoinContext] Unexpected response shape:", data);
                 setAllCoin([]);
                 setError(data?.status?.error_message || "Unexpected API response. You may be rate-limited.");
             }
         } catch (err) {
-            console.error("[CoinContext] Fetch error:", err);
+            logError("[CoinContext] Fetch error:", err);
             setError(err.message || "Failed to fetch coin data.");
             // Don't clear allCoin on error if we already have data (stale-while-revalidate)
             // setAllCoin([]);

@@ -2,6 +2,8 @@ import React, { useContext, useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { coinContext } from "../../Context/CoinContext";
 import LineChart from "../../Components/LineChart/LineChart";
+import { throttledFetch } from "../../utils/throttledFetch";
+import { log, error as logError } from "../../utils/logger";
 
 const apiCache = new Map();
 const CACHE_TTL = 60 * 1000; // 60 seconds
@@ -20,24 +22,26 @@ function Coin() {
     setLoading(true);
     setError(null);
     try {
-      const coinUrl = `https://api.coingecko.com/api/v3/coins/${coinId}`;
-      const histUrl = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=${currency.name}&days=10&interval=daily`;
+      // Route through Vercel serverless proxy — API key injected server-side.
+      // .env var: COINGECKO_API_KEY (no VITE_ prefix, server-only, never bundled into client JS)
+      const coinUrl = `/api/coin/${coinId}`;
+      const histUrl = `/api/coin/${coinId}/chart?vs_currency=${currency.name}&days=10&interval=daily`;
       const cacheKey = `${coinUrl}|${histUrl}`;
 
       const cached = apiCache.get(cacheKey);
       if (!force && cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
-        console.log("[Coin] Using cached data for:", coinId);
+        log("[Coin] Using cached data for:", coinId);
         setCoinData(cached.data.coinJson);
         setHistoricalData(cached.data.histJson);
         setLoading(false);
         return;
       }
 
-      console.log("[Coin] Fetching:", coinId);
+      log("[Coin] Fetching:", coinId);
 
       const [coinRes, histRes] = await Promise.all([
-        fetch(coinUrl),
-        fetch(histUrl),
+        throttledFetch(coinUrl),
+        throttledFetch(histUrl),
       ]);
 
       if (!coinRes.ok || !histRes.ok) {
@@ -54,7 +58,7 @@ function Coin() {
       setCoinData(coinJson);
       setHistoricalData(histJson);
     } catch (err) {
-      console.error("Error fetching coin details:", err);
+      logError("Error fetching coin details:", err);
       setError(err.message || "Something went wrong while fetching data.");
     } finally {
       setLoading(false);
